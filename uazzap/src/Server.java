@@ -2,7 +2,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
-import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
@@ -20,46 +19,56 @@ public class Server {
         try {
             this.serverSocket = new ServerSocket(port);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            this.port = -1;
+            System.out.println("Address already in use! There is probably another server here...");
+            return;
         }
 
         new Thread(() -> {
-            try {
-                while (true) {
+            while (true) {
+                BufferedReader newIn;
+                PrintWriter newOut;
+                try {
                     Socket newClient = this.serverSocket.accept();
                     System.out.println("Someone connected!");
                     this.clientsSocket.add(newClient);
-                    BufferedReader newIn = new BufferedReader(
+                    newIn = new BufferedReader(
                             new InputStreamReader(newClient.getInputStream())
                     );
                     this.in.add(newIn);
-                    new Thread(() -> {
-                        String message;
-                        while (true) {
-                            try {
-                                message = newIn.readLine();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                            if (message != null) {
-                                System.out.println(message);
-                                broadcast(message);
-                            }
-                        }
-                    }).start();
-                    this.out.add(new PrintWriter(newClient.getOutputStream(), true));
+                    newOut = new PrintWriter(newClient.getOutputStream(), true);
+                    this.out.add(newOut);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+                new Thread(() -> {
+                    String message;
+                    while (true) {
+                        try {
+                            message = newIn.readLine();
+                        } catch (IOException e) {
+                            break;
+                        }
+                        if (message != null) {
+                            System.out.println(message);
+                            broadcast(newOut, message);
+                        }
+                    }
+                }).start();
             }
         }).start();
     }
 
-    private void broadcast(String msg) {
+    private void broadcast(PrintWriter sender, String msg) {
+        if (this.port == -1) {
+            return;
+        }
         Iterator<PrintWriter> receivers = this.out.iterator();
         while (receivers.hasNext()) {
             PrintWriter receiver = receivers.next();
-            receiver.println(msg);
+            if (receiver != sender) {
+                receiver.println(msg);
+            }
         }
     }
 }

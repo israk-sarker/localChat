@@ -20,7 +20,9 @@ public class Client {
             );
             this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            this.port = -1;
+            System.out.println("Connection refused! Are you sure there is a server???");
+            return;
         }
 
         new Thread(() -> {
