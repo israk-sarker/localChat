@@ -38,8 +38,8 @@ public class Client {
         }).start();
 
         new Thread(() -> {
+            Scanner read = new Scanner(System.in);
             while (true) {
-                Scanner read = new Scanner(System.in);
                 String toSend = read.nextLine();
                 this.out.println(toSend);
             }
