@@ -34,7 +34,7 @@ public class Client {
                     throw new RuntimeException(e);
                 }
                 if (message != null) {
-                    System.out.println("Someone: " + message);
+                    System.out.println(message);
                 }
             }
         }).start();

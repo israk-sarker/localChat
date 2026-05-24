@@ -10,11 +10,13 @@ public class Server {
     private CopyOnWriteArrayList<Socket> clientsSocket;
     private CopyOnWriteArrayList<BufferedReader> in;
     private CopyOnWriteArrayList<PrintWriter> out;
-
+    private CopyOnWriteArrayList<String> nicknames;
+    
     public Server(int port) {
         this.clientsSocket = new CopyOnWriteArrayList<>();
         this.in = new CopyOnWriteArrayList<>();
         this.out = new CopyOnWriteArrayList<>();
+        this.nicknames = new CopyOnWriteArrayList<>();
         this.port = port;
         try {
             this.serverSocket = new ServerSocket(port);
@@ -42,6 +44,14 @@ public class Server {
                     throw new RuntimeException(e);
                 }
                 new Thread(() -> {
+                    newOut.println("Write your nickname: ");
+                    String nickname;
+                    try {
+                        nickname = newIn.readLine();
+                    } catch (IOException e) {
+                        nickname = "unknown";
+                    }
+                    this.nicknames.add(nickname);
                     String message;
                     while (true) {
                         try {
@@ -51,7 +61,7 @@ public class Server {
                         }
                         if (message != null) {
                             System.out.println(message);
-                            broadcast(newOut, message);
+                            broadcast(newOut, nickname, message);
                         }
                     }
                 }).start();
@@ -59,7 +69,7 @@ public class Server {
         }).start();
     }
 
-    private void broadcast(PrintWriter sender, String msg) {
+    private void broadcast(PrintWriter sender, String senderNickname, String msg) {
         if (this.port == -1) {
             return;
         }
@@ -67,7 +77,7 @@ public class Server {
         while (receivers.hasNext()) {
             PrintWriter receiver = receivers.next();
             if (receiver != sender) {
-                receiver.println(msg);
+                receiver.println("[" + senderNickname + "]: " + msg);
             }
         }
     }
