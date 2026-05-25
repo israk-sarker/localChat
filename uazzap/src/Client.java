@@ -33,7 +33,9 @@ public class Client {
                 if (message == null) {
                     return;
                 }
-                if (message.equals("/quit")) {
+                if (message.equals("/help")) {
+                    System.out.println("Commands list for client: /list, /whisper <nickname> <message>, /rename <nickname>, /quit");
+                } else if (message.equals("/quit")) {
                     System.out.println("You have left the chat");
                     this.out.println("/quit");
                     try {

@@ -20,8 +20,8 @@ public class Main {
         System.out.println("                                 | |   | |   ");
         System.out.println("                                 |_|   |_|   " + RESET);
         System.out.println(CYAN + BOLD + "--- Java Chat System v1.0 ---\n" + RESET);
-        System.out.println(CYAN + "Commands list for server: /kick <nickname>" + RESET);
-        System.out.println(CYAN + "Commands list for client: /list, /whisper <nickname> <message>, /quit" + RESET);
+        System.out.println(CYAN + "Commands list for server: /help, /list, /kick <nickname>" + RESET);
+        System.out.println(CYAN + "Commands list for client: /help, /list, /whisper <nickname> <message>, /rename <nickname>, /quit" + RESET);
         System.out.println();
 
         Scanner read = new Scanner(System.in);

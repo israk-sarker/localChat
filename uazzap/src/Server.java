@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Server {
     private int port;
@@ -95,6 +97,19 @@ public class Server {
                                         newOut.println("User not found: " + targetNick);
                                     }
                                 }
+                            } else if (message.startsWith("/rename ")) {
+                                String[] parts = message.split(" ", 2);
+                                if (parts.length < 2 || parts[1].isEmpty()) {
+                                    newOut.println("Usage: /rename <newnickname>");
+                                } else if (nicknames.contains(parts[1])) {
+                                    newOut.println("Nickname already taken: " + parts[1]);
+                                } else {
+                                    String oldNick = nickname;
+                                    nickname = parts[1];
+                                    nicknames.set(nicknames.indexOf(oldNick), nickname);
+                                    newOut.println("Nickname changed to: " + nickname);
+                                    broadcast(newOut, "Server", oldNick + " is now known as " + nickname);
+                                }
                             } else if (message.equals("/list")) {
                                 newOut.println(Arrays.toString(this.nicknames.toArray()));
                             } else if (message.equals("/quit")) {
@@ -120,6 +135,13 @@ public class Server {
             Scanner read = new Scanner(System.in);
             while (true) {
                 String toSend = read.nextLine();
+                if (toSend.equals("/help")) {
+                    System.out.println("Commands list for server: /help, /list, /kick <nickname>");
+                    continue;
+                }
+                if (toSend.equals("/list")) {
+                    System.out.println(Arrays.toString(this.nicknames.toArray()));
+                }
                 if (toSend.startsWith("/kick ")) {
                     if (toSend.split(" ").length != 2) {
                         System.out.println("Usage: /kick <nickname>");
@@ -137,11 +159,12 @@ public class Server {
         if (this.port == -1) {
             return;
         }
+        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
         Iterator<PrintWriter> receivers = this.out.iterator();
         while (receivers.hasNext()) {
             PrintWriter receiver = receivers.next();
             if (receiver != sender) {
-                receiver.println("[" + senderNickname + "]: " + msg);
+                receiver.println("[" + time + "] [" + senderNickname + "]: " + msg);
             }
         }
     }
