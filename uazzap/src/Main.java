@@ -19,7 +19,10 @@ public class Main {
         System.out.println(" \\_____|_| |_|\\__,_|\\__|  /____\\_\\ .__/| .__/");
         System.out.println("                                 | |   | |   ");
         System.out.println("                                 |_|   |_|   " + RESET);
-        System.out.println(CYAN + "--- Java Chat System v1.0 ---\n" + RESET);
+        System.out.println(CYAN + BOLD + "--- Java Chat System v1.0 ---\n" + RESET);
+        System.out.println(CYAN + "Commands list for server: /kick <nickname>" + RESET);
+        System.out.println(CYAN + "Commands list for client: /list, /whisper <nickname> <message>, /quit" + RESET);
+        System.out.println();
 
         Scanner read = new Scanner(System.in);
         boolean roleTaken = false;
@@ -28,11 +31,21 @@ public class Main {
             // Prompt di scelta colorato
             System.out.print(YELLOW + BOLD + "Seleziona modalità (server / client): " + RESET);
             String input = read.nextLine().toLowerCase().trim();
+            if (!input.equals("server") && !input.equals("client")) {
+                System.out.println(RED + "Input non valido" + RESET);
+                continue;
+            }
 
-            System.out.print(CYAN + "Seleziona la porta: " + RESET);
-            int port = -1;
+            System.out.print(CYAN + "Seleziona la porta [default: 6769]: " + RESET);
+            int port;
+            String portInput;
             try {
-                port = Integer.parseInt(read.nextLine());
+                portInput = read.nextLine();
+                if (portInput == null || portInput.isEmpty()) {
+                    port = 6769;
+                } else {
+                    port = Integer.parseInt(portInput);
+                }
             } catch (Exception e) {
                 System.out.println(RED + "Porta non valida" + RESET);
                 continue;
@@ -40,19 +53,24 @@ public class Main {
 
             try {
                 if (input.equals("server")) {
-                    System.out.println(CYAN + "Inizializzazione Server sulla porta " + port + "..." + RESET);
+                    System.out.println(CYAN + "Inizializzato Server sulla porta " + port + RESET);
                     new Server(port);
                     roleTaken = true;
                 } else if (input.equals("client")) {
-                    System.out.println(CYAN + "Inizializzazione Client..." + RESET);
-                    new Client(port);
+                    System.out.print(CYAN + "Inserisci l'indirizzo [default: localhost]: " + RESET);
+                    String address = read.nextLine();
+                    if (address == null || address.isEmpty()) {
+                        address = "localhost";
+                    }
+                    System.out.println(CYAN + "Inizializzato Client" + RESET);
+                    new Client(address, port);
                     roleTaken = true;
                 } else {
                     // Messaggio di errore in rosso se l'input è sbagliato
                     System.out.println(RED + "Comando non valido. Inserisci 'server' oppure 'client'." + RESET);
                 }
             } catch (RuntimeException e) {
-                System.out.println("The port is already in use");
+                System.out.println("Porta gia utilizzata :/");
             }
         }
     }

@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -11,17 +8,17 @@ public class Client {
     private BufferedReader in;
     private PrintWriter out;
 
-    public Client(int port) {
+    public Client(String address, int port) {
         try {
             this.port = port;
-            this.clientSocket = new Socket("127.0.0.1", port);
+            this.clientSocket = new Socket(address, port);
             this.in = new BufferedReader(
                     new InputStreamReader(this.clientSocket.getInputStream())
             );
             this.out = new PrintWriter(this.clientSocket.getOutputStream(), true);
         } catch (Exception e) {
             this.port = -1;
-            System.out.println("Connection refused! Are you sure there is a server???");
+            System.out.println("Connessione rifiutata! Sei sicuro ce un server qua???");
             return;
         }
 
@@ -33,7 +30,17 @@ public class Client {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                if (message != null) {
+                if (message == null) {
+                    return;
+                }
+                if (message.equals("/quit")) {
+                    System.out.println("You have left the chat");
+                    this.out.println("/quit");
+                    try {
+                        this.clientSocket.close();
+                        System.exit(0);
+                    } catch (IOException ignored) {}
+                } else {
                     System.out.println(message);
                 }
             }
