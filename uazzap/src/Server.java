@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
@@ -22,8 +23,7 @@ public class Server {
             this.serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             this.port = -1;
-            System.out.println("Address already in use! There is probably another server here...");
-            return;
+            throw new RuntimeException(e);
         }
 
         new Thread(() -> {
@@ -67,6 +67,20 @@ public class Server {
                 }).start();
             }
         }).start();
+
+        new Thread(() -> {
+            Scanner read = new Scanner(System.in);
+            while (true) {
+                String toSend = read.nextLine();
+                if (toSend.charAt(0) != '/') {
+                    broadcast(null, "Admin", toSend);
+                    continue;
+                }
+                if (toSend.startsWith("/kick ")) {
+                    kick(toSend.substring(6));
+                }
+            }
+        }).start();
     }
 
     private void broadcast(PrintWriter sender, String senderNickname, String msg) {
@@ -78,6 +92,18 @@ public class Server {
             PrintWriter receiver = receivers.next();
             if (receiver != sender) {
                 receiver.println("[" + senderNickname + "]: " + msg);
+            }
+        }
+    }
+
+    private void kick(String toKick) {
+        for (int i = 0; i < nicknames.size(); i++) {
+            if (nicknames.get(i).equals(toKick)) {
+                try {
+                    clientsSocket.get(i).close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

@@ -1,3 +1,4 @@
+import java.net.BindException;
 import java.util.Scanner;
 
 public class Main {
@@ -22,24 +23,36 @@ public class Main {
 
         Scanner read = new Scanner(System.in);
         boolean roleTaken = false;
-        int port = 3894;
 
         while (!roleTaken) {
             // Prompt di scelta colorato
             System.out.print(YELLOW + BOLD + "Seleziona modalità (server / client): " + RESET);
             String input = read.nextLine().toLowerCase().trim();
 
-            if (input.equals("server")) {
-                System.out.println(CYAN + "Inizializzazione Server sulla porta " + port + "..." + RESET);
-                new Server(port);
-                roleTaken = true;
-            } else if (input.equals("client")) {
-                System.out.println(CYAN + "Inizializzazione Client..." + RESET);
-                new Client(port);
-                roleTaken = true;
-            } else {
-                // Messaggio di errore in rosso se l'input è sbagliato
-                System.out.println(RED + "Comando non valido. Inserisci 'server' oppure 'client'." + RESET);
+            System.out.print(CYAN + "Seleziona la porta: " + RESET);
+            int port = -1;
+            try {
+                port = Integer.parseInt(read.nextLine());
+            } catch (Exception e) {
+                System.out.println(RED + "Porta non valida" + RESET);
+                continue;
+            }
+
+            try {
+                if (input.equals("server")) {
+                    System.out.println(CYAN + "Inizializzazione Server sulla porta " + port + "..." + RESET);
+                    new Server(port);
+                    roleTaken = true;
+                } else if (input.equals("client")) {
+                    System.out.println(CYAN + "Inizializzazione Client..." + RESET);
+                    new Client(port);
+                    roleTaken = true;
+                } else {
+                    // Messaggio di errore in rosso se l'input è sbagliato
+                    System.out.println(RED + "Comando non valido. Inserisci 'server' oppure 'client'." + RESET);
+                }
+            } catch (RuntimeException e) {
+                System.out.println("The port is already in use");
             }
         }
     }
